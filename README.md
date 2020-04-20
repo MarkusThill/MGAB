@@ -10,7 +10,7 @@ An excerpt of a time series caontaining 3 anomalies is shown in the graph above.
 ## The Benchmark Files
 The labeled data for the time series 1-10 can be found in the CSV files [1-10].csv. Each file contains a table with 4 columns: 
 1. `time`: Time in seconds in the range 0 to 10<sup>5</sup> -1.
-2. `value`: Value in the range [0.26, 0.66].
+2. `value`: Value of x(t) in the range [0.26, 1.66].
 3. `is_anomaly`: Binary values (0/1) indicate which data points are considered as normal (0) or anomalous (1). For each anomaly, a range of 400 points, the so called anomaly window, is flagged. Detections within the anomaly window are to be considered as correct.
 4. `is_ignored`: Since some algorithms might require a "warm-up" phase when processing the time series, the is_ignored column indicates for the initial 256 time steps that false detections can be ignored. It was ensured that no anomalies were placed at the beginning of any time series.
 
@@ -19,7 +19,7 @@ We use the following Mackey-Glass equation (a non-linear time delay differential
 
 ![\frac{dx}{dt} = \beta \cdot \frac{x(t-\tau)}{1+x(t-\tau)^n} - \gamma x(t)](https://render.githubusercontent.com/render/math?math=%5Cfrac%7Bdx%7D%7Bdt%7D%20%3D%20%5Cbeta%20%5Ccdot%20%5Cfrac%7Bx(t-%5Ctau)%7D%7B1%2Bx(t-%5Ctau)%5En%7D%20-%20%5Cgamma%20x(t))
 
-The parameters are real numbers which we set to τ=18, n=10, β=0.25, γ=0.1. Additionally, a constant history parameter is required which is set to h=0.9. A sufficiently long time series is generated using the [JiTCDDE](https://github.com/neurophysik/jitcdde) solver which is then divided into 10 new time series. The time delay embedding of such a time series is illustrated in Fig. 1.
+The parameters are real numbers which we set to τ=18, n=10, β=0.25, γ=0.1. Additionally, a constant history parameter is required which is set to h=0.9. A sufficiently long time series is generated using the [JiTCDDE](https://github.com/neurophysik/jitcdde) solver using a integration stepsizize of one, which is then divided into 10 new time series. The time delay embedding of such a time series is illustrated in Fig. 1.
 
 ![Pseudo-code of the anomaly insertion procedure for Mackey-Glass time series.][timedelay]<br>**Figure 1**: Time  delay  embedding  of  the  Mackey-Glass  attractor.
 
@@ -35,6 +35,15 @@ The main idea of the anomaly insertion process is to randomly remove segments fr
 The procedure is also summarized in Algorithm 1 below.
 ![Pseudo-code of the anomaly insertion procedure for Mackey-Glass time series.][algorithm1]
 
+An example of how such an anomaly, which was generated using the described procedure, could look like is illustrated in Fig. 2. For the human eye it would be almost impossible to spot the anomaly.
+
+![Example Anomaly in a MG time series 1][mgexample1] ![Example Anomaly in a MG time series 1][mgexample2]<br>
+**Figure 2**: Top: Example for the creation of a Mackey-Glass time series with a temporal anomaly. The original time series (dashed line) is manipulated in such a way, that a segment is removed and the two remaining ends are joined together. In this example, the interval [21562,21703] is removed from the original curve. The resulting manipulated time series (solid line) has a smooth point of connection, but significantly differs from the original. Bottom: Zoomed-In. The red shaded area indicates the position where the anomaly was inserted.
+
+## Final Notes
+For the 10 time series of this benchmark, in total 100 anomalies were inserted (10 anomalies per time series). In the last step, in order to increase the complexity of the anomaly detection task slightly, we add noise drawn from a random uniform distribution with the range [-0.01, 0.01] to each point of all time series. 
+
+
 
 ![Anomalous Mackey-Glass Time Series with revealed Anomalies][footer]
 **Figure 5**: This graph shows the same section of a Mackey-Glass time series as the first graph on this page, but now reveals the location of the anomalies in the time series. The anomalies are at t<sub>1</sub> = 40388, t<sub>2</sub>=40917 and t<sub>3</sub>=41550. The positions are indicated by the black crosses in the plot.
@@ -43,3 +52,5 @@ The procedure is also summarized in Algorithm 1 below.
 [footer]: https://github.com/MarkusThill/MGAB/blob/master/img/mg_example_anomalies_revealed.png?raw=true "Anomalous Mackey Glass Time Series with revealed Anomalies"
 [algorithm1]: https://github.com/MarkusThill/MGAB/blob/master/img/pseudocode.png?raw=true "Pseudo-code of the anomaly insertion procedure for Mackey-Glass time series."
 [timedelay]: https://github.com/MarkusThill/MGAB/blob/master/img/time-delay-embedding.png?raw=true "Time  delay  embedding  of  the  Mackey-Glass  attractor."
+[mgexample1]: https://github.com/MarkusThill/MGAB/blob/master/img/mg-anomaly-example.png?raw=true "Example Anomaly in a MG time series 1"
+[mgexample2]: https://github.com/MarkusThill/MGAB/blob/master/img/mg-anomaly-example-zoom.png?raw=true "Example Anomaly in a MG time series 2"
