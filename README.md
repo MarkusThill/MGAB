@@ -19,7 +19,7 @@ We use the following Mackey-Glass equation (a non-linear time delay differential
 
 ![\frac{dx}{dt} = \beta \cdot \frac{x(t-\tau)}{1+x(t-\tau)^n} - \gamma x(t)](https://render.githubusercontent.com/render/math?math=%5Cfrac%7Bdx%7D%7Bdt%7D%20%3D%20%5Cbeta%20%5Ccdot%20%5Cfrac%7Bx(t-%5Ctau)%7D%7B1%2Bx(t-%5Ctau)%5En%7D%20-%20%5Cgamma%20x(t))
 
-The parameters are real numbers which we set to τ=18, n=10, β=0.25, γ=0.1. Additionally, a constant history parameter is required which is set to h=0.9. A sufficiently long time series is generated using the [JiTCDDE](https://github.com/neurophysik/jitcdde) solver using a integration stepsizize of one, which is then divided into 10 new time series. The time delay embedding of such a time series is illustrated in Fig. 1.
+The parameters are real numbers which we set to τ=18, n=10, β=0.25, γ=0.1. Additionally, a constant history parameter is required which is set to h=0.9. A sufficiently long time series is generated using the [JiTCDDE](https://github.com/neurophysik/jitcdde) solver ( with an integration stepsize of one) which is then divided into 10 new time series. The time delay embedding of such a time series is illustrated in Fig. 1.
 
 ![Pseudo-code of the anomaly insertion procedure for Mackey-Glass time series.][timedelay]<br>**Figure 1**: Time  delay  embedding  of  the  Mackey-Glass  attractor.
 
@@ -46,7 +46,7 @@ For the 10 time series of this benchmark, in total 100 anomalies were inserted (
 
 
 ![Anomalous Mackey-Glass Time Series with revealed Anomalies][footer]
-**Figure 5**: This graph shows the same section of a Mackey-Glass time series as the first graph on this page, but now reveals the location of the anomalies in the time series. The anomalies are at t<sub>1</sub> = 40388, t<sub>2</sub>=40917 and t<sub>3</sub>=41550. The positions are indicated by the black crosses in the plot.
+**Figure 3**: This graph shows the same section of a Mackey-Glass time series as the first graph on this page, but now reveals the location of the anomalies in the time series. The anomalies are at t<sub>1</sub> = 40388, t<sub>2</sub>=40917 and t<sub>3</sub>=41550. The positions are indicated by the black crosses in the plot.
 
 [header]: https://github.com/MarkusThill/MGAB/blob/master/img/mg_example_anomalies_hidden.png?raw=true "Anomalous Mackey Glass Time Series"
 [footer]: https://github.com/MarkusThill/MGAB/blob/master/img/mg_example_anomalies_revealed.png?raw=true "Anomalous Mackey Glass Time Series with revealed Anomalies"
