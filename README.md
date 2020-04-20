@@ -22,6 +22,7 @@ We use the following Mackey-Glass equation (a non-linear time delay differential
 The parameters are real numbers which we set to τ=18, n=10, β=0.25, γ=0.1. Additionally, a constant history parameter is required which is set to h=0.9. A sufficiently long time series is generated using the [JiTCDDE](https://github.com/neurophysik/jitcdde) solver which is then divided into 10 new time series. The time delay embedding of such a time series is illustrated in Fig. 1.
 
 ![Pseudo-code of the anomaly insertion procedure for Mackey-Glass time series.][timedelay]
+
 **Figure 1**: Time  delay  embedding  of  the  Mackey-Glass  attractor.
 
 
