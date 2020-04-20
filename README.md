@@ -21,14 +21,10 @@ We use the following Mackey-Glass equation (a non-linear time delay differential
 
 The parameters are real numbers which we set to τ=18, n=10, β=0.25, γ=0.1. Additionally, a constant history parameter is required which is set to h=0.9. A sufficiently long time series is generated using the [JiTCDDE](https://github.com/neurophysik/jitcdde) solver which is then divided into 10 new time series. The time delay embedding of such a time series is illustrated in Fig. 1.
 
-![Pseudo-code of the anomaly insertion procedure for Mackey-Glass time series.][timedelay]
-
-**Figure 1**: Time  delay  embedding  of  the  Mackey-Glass  attractor.
-
+![Pseudo-code of the anomaly insertion procedure for Mackey-Glass time series.][timedelay]<br>**Figure 1**: Time  delay  embedding  of  the  Mackey-Glass  attractor.
 
 ## Anomaly Insertion Process
 The main idea of the anomaly insertion process is to randomly remove segments from each time series in a way that this will be hardly visible later. To do so, we try to find two points (with a minimal and maximal distance) in a random segment of the time series so that the values of these two points as well as their derivatives closely match. Then, we remove the segment between those two points and "stich" the remaining parts together again. The exact procedure is as follows:
-
 
 1. For the time series sequence ![x(t)](https://render.githubusercontent.com/render/math?math=x(t)) estimate the first 3 derivatives ![dx/dt](https://render.githubusercontent.com/render/math?math=dx%2Fdt), ![d^2x/dx^2](https://render.githubusercontent.com/render/math?math=d%5E2x%2Fdx%5E2) and ![d^3x/dx^3](https://render.githubusercontent.com/render/math?math=d%5E3x%2Fdx%5E3) by numerical differentiation of ![x(t)](https://render.githubusercontent.com/render/math?math=x(t)). Then, stack the original time series ![x(t)](https://render.githubusercontent.com/render/math?math=x(t)) and the three derivatives in a four-dimensional time series ![\mathbf x(t)](https://render.githubusercontent.com/render/math?math=%5Cmathbf%20x(t)).
 2. Randomly select a position ![t_i](https://render.githubusercontent.com/render/math?math=t_i) in ![\mathbf x(t)](https://render.githubusercontent.com/render/math?math=%5Cmathbf%20x(t)). This will be the first split point
