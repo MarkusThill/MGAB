@@ -1,6 +1,8 @@
 ---
 header-includes:
   - \usepackage[ruled,vlined,linesnumbered]{algorithm2e}
+  - \usepackage{algorithm}
+  - \usepackage{algpseudocode}
 ---
 
 # The Mackey-Glass Anomaly Benchmark
