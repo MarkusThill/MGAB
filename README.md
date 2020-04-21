@@ -8,7 +8,7 @@ In contrast to other synthetic benchmarks,  it is very hard for the human eye to
 An excerpt of a time series caontaining 3 anomalies is shown in the graph above. The location of the anomalies are revealed in the last plot of this page.
 
 ## The Benchmark Files
-The labeled data for the time series 1-10 can be found in the CSV files [1-10].csv. Each file contains a table with 4 columns: 
+The labeled data for the time series 1-10 can be found in the CSV files `[1-10].csv`. Each file contains a table with 4 columns: 
 1. `time`: Time in seconds in the range 0 to 10<sup>5</sup> -1.
 2. `value`: Value of x(t) in the range [0.26, 1.66].
 3. `is_anomaly`: Binary values (0/1) indicate which data points are considered as normal (0) or anomalous (1). For each anomaly, a range of 400 points, the so called anomaly window, is flagged. Detections within the anomaly window are to be considered as correct.
