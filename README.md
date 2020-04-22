@@ -7,6 +7,16 @@ This repository contains the Mackey-Glass anomaly benchmark (MGAB), which is com
 In contrast to other synthetic benchmarks,  it is very hard for the human eye to distinguish the introduced anomalies from the normal (chaotic) behavior. 
 An excerpt of a time series caontaining 3 anomalies is shown in the graph above. The location of the anomalies are revealed in the last plot of this page.
 
+### Authors/Contributors
+* [Markus Thill](https://github.com/MarkusThill): markus.thill@th-koeln.de
+* [Wolfgang Konen](https://github.com/WolfgangKonen/): wolfgang.konen@th-koeln.de
+
+### Citing this Repository
+
+## Download
+The easiest way to download this repository is to clone it with Git:
+`git clone https://github.com/MarkusThill/MGAB.git`
+
 ## The Benchmark Files
 The labeled data for the time series 1-10 can be found in the CSV files `[1-10].csv`. Each file contains a table with 4 columns: 
 1. `time`: Time in seconds in the range 0 to 10<sup>5</sup> -1.
@@ -40,13 +50,71 @@ An example of how such an anomaly, which was generated using the described proce
 ![Example Anomaly in a MG time series 1][mgexample1] ![Example Anomaly in a MG time series 1][mgexample2]<br>
 **Figure 2**: Top: Example for the creation of a Mackey-Glass time series with a temporal anomaly. The original time series (dashed line) is manipulated in such a way, that a segment is removed and the two remaining ends are joined together. In this example, the interval [21562,21703] is removed from the original curve. The resulting manipulated time series (solid line) has a smooth point of connection, but significantly differs from the original. Bottom: Zoomed-In. The red shaded area indicates the position where the anomaly was inserted.
 
-## Final Notes
+## Adding Noise
 For the 10 time series of this benchmark, in total 100 anomalies were inserted (10 anomalies per time series). In the last step, in order to increase the complexity of the anomaly detection task slightly, we add noise drawn from a random uniform distribution with the range [-0.01, 0.01] to each point of all time series. 
-
-
 
 ![Anomalous Mackey-Glass Time Series with revealed Anomalies][footer]
 **Figure 3**: This graph shows the same section of a Mackey-Glass time series as the first graph on this page, but now reveals the location of the anomalies in the time series. The anomalies are at t<sub>1</sub> = 40388, t<sub>2</sub>=40917 and t<sub>3</sub>=41550. The positions are indicated by the black crosses in the plot.
+
+# Generating your own MGAB Benchmark
+
+Based on the procedure described in the previous section, it is also possible to adjust different parameters and generate an own MGAB with steerable size and difficulty.
+
+## Necessary Files
+
+## Dependencies
+The following dependencies are required for running the code on all operating systems. In the parentheses we add the version, which we used for our experiments. 
+* [Python 3](https://www.python.org/) (3.6.9)
+* [jitcdde](https://github.com/neurophysik/jitcdde) (1.5.0) `pip3 install jitcdde`
+* [numpy](https://numpy.org/) (1.14.5) `pip3 install numpy`
+* [scipy](https://www.scipy.org/) (1.4.1)`pip3 install scipy`
+* [matplotlib](https://matplotlib.org/) (3.1.1) `pip3 install matplotlib`
+* [pandas](https://pandas.pydata.org/) (0.23.3) `pip3 install pandas`
+
+## Usage
+
+The main function of this module is `generate_benchmark(args)`. All parameters are passed to this function through a Python dictionary. It is possible to pass an empty dictionary or no argument at all. Typically, one would specify a subset of the required parameters in the dictionary; the function would then use the default values for the remaining parameters.  
+
+Usage:
+```python3
+import mgab_generator
+mgab = generate_benchmark(args)
+```
+####  `generate_benchmark(args:dict={'reproduce_original_mgab':'use_precomputed_mg'})` 
+Generates a MGAB according to the specifications of the user. A list of MG time series with a certain number of anomalies is created. The created time series can be directly written to CSV-files and/or returned by this function and processed further.  
+- **Parameters** 
+  - `args`: Dictionary, containing all user-specified parameters for generating a MGAB benchmark. It is not necessary to pass any argument to `generate_benchmark()`. In this case, the original MGAB data is created which was also uploaded to this repository. The function will use the pre-computed MG time series from the file `./data/mgts_len=5000000tau=18n=10.0bet=0.25gam=0.1h=0.9T=1.npy` to generate the 10 original time series. It is also possible to create the whole benchmark from scratch, by adjusting the dictionary entry of `'reproduce_original_mgab'`, as described below. Currently, the following options are supported:
+    - `'verbosity'` **(int)**: Integer, describing the level of verbosity. 
+       - 0: No outputs to stdout 
+       - 1: Print standard Info-messages
+       - larger 1: Debug Messages 
+       - **default**: `1`
+    - `'output_dir'` **(str)**:  **default**: `'./mgab/'`,
+    - `'output_force_override'` **(bool)**:  **default**:`False`,  With this parameter you can force the generator to override benchmark files in the output directory, if a file with that name already exists
+    - `'output_format'`**(str)**:  **default**:`'csv'`, # 'csv' (currently, only csv supported)
+    - `'num_series'`**(int)**:  **default**:`10`,
+    - `'series_length'`**(int)**:  **default**:`100000`,
+    - `'num_anomalies'`**(int)** :  **default**:`10`,
+    - `'noise'`**(str)** :  **default**:`'rnd_uniform'`, # 'rnd_normal', 'rnd_walk', None
+    - `'noise_param'`**(tuple,float)** :  **default**:`(-0.01, 0.01)`, # range for 
+    - `'min_anomaly_distance'`**(int)** :  **default**:`2000`,
+    - `'mg_ts_path_load'`**(str)**:  **default**:`None`, # Default path to a long pre-computed MG time series, which can be used to generate the time series. Should be a numpy array.
+    - `'mg_tau'`**(float)** :  **default**:`18.0`,
+    - `'mg_n'`**(float)**:  **default**:`10.0`,
+    - `'mg_beta'`**(float)** :  **default**:`0.25`,
+    - `'mg_gamma'`**(float)** :  **default**:`0.1`,
+    - `'mg_history'`**(float)** :  **default**:`0.9`,
+    - `'mg_T'`**(float)**:  **default**:`1.0`,
+    - `'mg_ts_dir_save'`**(str)**:  **default**:`None`,
+    - `'seed'`**(int)**:  **default**:`None`, # None: Take the value i for the i-th time series as seed (0,1,...)
+    - `'min_length_cut'`**(int)**:  **default**:`100`, # It does not make sense to make a trivial cut (e.g. cut segment of length 1)
+    - `'max_sgmt'`**(int)**:  **default**:`100`, # maximum segment length in which we want to find the closest value
+    - `'anomaly_window'`**(int)**:  **default**:`400` Window size of anomaly window which is put around each anomaly. Smaller windows increase the difficulty, since algorithms have to locate the anomalies for accurately.
+    - `'order_derivative'`**(int)**:  **default**:`3`, # until which derivative do we want to compare the similarity of the points (0->only value, 1-> value and 1st derivative, ...)
+    - `'reproduce_original_mgab'`:  **default**:`None` # None, 'generate_new_mg', 'use_precomputed_mg'
+- **Returns**
+
+## Examples
 
 [header]: https://github.com/MarkusThill/MGAB/blob/master/img/mg_example_anomalies_hidden.png?raw=true "Anomalous Mackey Glass Time Series"
 [footer]: https://github.com/MarkusThill/MGAB/blob/master/img/mg_example_anomalies_revealed.png?raw=true "Anomalous Mackey Glass Time Series with revealed Anomalies"
