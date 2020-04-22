@@ -77,7 +77,7 @@ The main function of this module is `generate_benchmark(args)`. All parameters a
 
 Usage:
 ```python3
-import mgab_generator
+import mgab
 mgab = generate_benchmark(args)
 ```
 ####  `generate_benchmark(args:dict={'reproduce_original_mgab':'use_precomputed_mg'})` 
@@ -146,6 +146,34 @@ Generates a MGAB according to the specifications of the user. A list of MG time 
     - A list of Pandas DataFrames containing the anomalous time series including the anomaly labels. Each DataFrame has an index column, the column "value", "is_anomaly" and "is_ignored". These columns are described above.
 
 ## Examples
+
+```python3
+# Generate the original MGAB. This will create a directory "mgab" (if not existant yet),
+# and write the 10 CSV-files containing the 10 time series into this folder. These CSV-
+# files should be exactly the same as the original ones in this repository.
+import mgab
+original_mgab = mgab.generate_benchmark()
+```
+
+```python3
+# Generate the original MGAB. This will create a directory "mgab" (if not existant yet),
+# and write the 10 CSV-files containing the 10 time series into this folder. These CSV-
+# files should be exactly the same as the original ones in this repository.
+import mgab
+my_new_benchmark = mgab.generate_benchmark({ # we choose a few parameters ourselves
+        'output_dir' : 'my_new_benchmark', # specify new directory for the output files
+        'output_force_override': True, # Override files, if necessary
+        'num_series': 3, # Create only 3 time series for this benchmark
+        'series_length': 10000, # Only create time series of lenth 10k
+        'num_anomalies' : 5, # Each time series contains 5 anomalies
+        'noise' : 'rnd_uniform',# Add random uniform noise
+        'noise_param' : (-0.01, 0.01), # range for random uniform noise
+        'min_anomaly_distance' : 200, # Anomalies have to have a distance of at least 200
+        'mg_ts_path_load' : None, # We do not have any pre-computed MG time series. So generate it with the DDE solver
+        'mg_ts_dir_save' : "./data/" # Save the generated MG time series of the DDE solver in the data directory. This 
+                                     # allows us, to reuse it again (e.g., if we want to change the number of anomalies)
+     })
+```
 
 [header]: https://github.com/MarkusThill/MGAB/blob/master/img/mg_example_anomalies_hidden.png?raw=true "Anomalous Mackey Glass Time Series"
 [footer]: https://github.com/MarkusThill/MGAB/blob/master/img/mg_example_anomalies_revealed.png?raw=true "Anomalous Mackey Glass Time Series with revealed Anomalies"
