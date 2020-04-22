@@ -88,8 +88,8 @@ Generates a MGAB according to the specifications of the user. A list of MG time 
        - 0: No outputs to stdout 
        - 1: Print standard Info-messages
        - larger 1: Debug Messages 
-       - **default**: `1`
-    - `'output_dir'` **(str)**:  **default**: `'./mgab/'`,
+       - **default**: *`1`*
+    - `'output_dir'` **(str)**:  **default**: *`'./mgab/'`*,
     - `'output_force_override'` **(bool)**:  **default**:`False`,  With this parameter you can force the generator to override benchmark files in the output directory, if a file with that name already exists
     - `'output_format'`**(str)**:  **default**:`'csv'`, # 'csv' (currently, only csv supported)
     - `'num_series'`**(int)**:  **default**:`10`,
