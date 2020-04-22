@@ -87,62 +87,63 @@ Generates a MGAB according to the specifications of the user. A list of MG time 
     - `'verbosity'` **(int)**: Integer, describing the level of verbosity. 
        - 0: No outputs to stdout 
        - 1: Print standard Info-messages
-       - larger 1: Debug Messages 
-       - **default**: *1*
-    - `'output_dir'` **(str)**:  
-       - **default**: *'./mgab/'*,
-    - `'output_force_override'` **(bool)**:  
-       - **default**:*False*,  With this parameter you can force the generator to override benchmark files in the output directory, if a file with that name already exists
-    - `'output_format'`**(str)**: Currently, only 'csv' is supported)
-       - **default**:*'csv'*
-    - `'num_series'`**(int)**:  
-       - **default**:*10*,
-    - `'series_length'`**(int)**:  
-       - **default**:*100000*,
-    - `'num_anomalies'`**(int)** :  
-       - **default**:*10*,
-    - `'noise'`**(str)** :  
-       - 'rnd_uniform':
-       - 'rnd_walk':
-       - 'rnd_normal': 
-       - None: 
-       - **default**:*'rnd_uniform'*
-    - `'noise_param'`**(tuple,float)** :
-       - **default**:*(-0.01, 0.01)*
-    - `'min_anomaly_distance'`**(int)** :  
-       - **default**:*2000*,
-    - `'mg_ts_path_load'`**(str)**: Full path to a long pre-computed MG time series, which can be used to generate the time series. Should be a numpy array.
-       - **default**:*None*
-    - `'mg_tau'`**(float)** :  
-       - **default**:*18.0*,
-    - `'mg_n'`**(float)**:  
-       - **default**:*10.0*,
-    - `'mg_beta'`**(float)** :  
-       - **default**:*0.25*,
-    - `'mg_gamma'`**(float)** :  
-       - **default**:*0.1*,
-    - `'mg_history'`**(float)** :  
-       - **default**:*0.9*,
-    - `'mg_T'`**(float)**:  
-       - **default**:*1.0*,
-    - `'mg_ts_dir_save'`**(str)**:  
-       - **default**:*None*,
-    - `'seed'`**(int)**:  
-       - **default**:*None*, # None: Take the value i for the i-th time series as seed (0,1,...)
-    - `'min_length_cut'`**(int)**:  
-       - **default**:*100*, # It does not make sense to make a trivial cut (e.g. cut segment of length 1)
-    - `'max_sgmt'`**(int)**:  
-       - **default**:*100*, # maximum segment length in which we want to find the closest value
-    - `'anomaly_window'`**(int)**:  
-       - **default**:*400* Window size of anomaly window which is put around each anomaly. Smaller windows increase the difficulty, since algorithms have to locate the anomalies for accurately.
-    - `'order_derivative'`**(int)**: Until which (numerical) derivative do we want to compare the similarity of the points (0->only value, 1-> value and 1st derivative, ...)
-       - **default**:*3*
-    - `'reproduce_original_mgab'`:  
-       - 'generate_new_mg'
-       - 'use_precomputed_mg'
-       - None
-       - **default**:*None*
+       - Larger than 1: Debug Messages 
+       - **default**:  *1*
+    - `'output_dir'` **(str)**: Directory, in which the resulting files containing the individual time series will be written. The option `None` allows to turn off the saving. Per default, the files are named 1.csv, 2.csv, ... and have the same format as the original files described above. 
+       - **default**:  *'./mgab/'*,
+    - `'output_force_override'` **(bool)**: If a file with the same name already exists in the output directory, then this will *not* be overwritten per default. This can be changed by setting this option to *True*. So with this option you can force the generator to override benchmark files in the output directory, if a file with that name already exists.
+       - **default**:  *False*
+    - `'output_format'`**(str)**: Currently, only 'csv' is supported. All output files, saved as 1.csv, 2.csv, ..., are comma-seperated-value (CSV) files.
+       - **default**:  *'csv'*
+    - `'num_series'`**(int)**: The number of individual anomalous time series, which should be generated. Creating many time series might take a lot of time, since the DDE solver has to pre-compute (and if no already pre-computed MG time series is available, see `'mg_ts_path_load'`) one long MG time series which is then split into the specified number.   
+       - **default**:  *10*
+    - `'series_length'`**(int)**: The length of one anomalous time series. Similarly to `'num_series'`, it might be computationally expensive, if too large values are chosen.
+       - **default**:  *100000*
+    - `'num_anomalies'`**(int)** : The number of anomalies which are placed into each time series. E.g., if 10 time series are generated and this option is set to 10, then the overall benchmark will contain 100 anomalies.
+       - **default**:  *10*,
+    - `'noise'`**(str)** :   In order to further increase the complexity of the benchmark and to be more similar to real-world problems, there is a possibility to add random noise to the individual anomalous MG time series. It is also possible to turn off the noise component. The amount of noise is controlled by `'noise_param'`. There are 4 options: 
+       - 'rnd_uniform': Adds random uniform noise to the time series.
+       - 'rnd_walk': Samples from a random uniform distribution and computes a random walk (cumulative sum) over these values.
+       - 'rnd_normal': Sample from a Gaussian normal distribution.
+       - None: Do not add any noise to the time series
+       - **default**:  *'rnd_uniform'*
+    - `'noise_param'`**(tuple,float)** : For 'rnd_uniform' and 'rnd_walk', specifies the lower and upper bound for the random uniform distribution, respectively. For 'rnd_normal', the first element describes the mean (loc) and the second element the standard deviation (scale).
+       - **default**:  *(-0.01, 0.01)* for 'rnd_uniform', *(-0.001, 0.001)* for 'rnd_walk' and *(0, 0.01)* for 'rnd_normal'.
+    - `'min_anomaly_distance'`**(int)** : The minimum distance between 2 anomalies. The difficulty of the benchmark usually increases, if this distance is reduced.
+       - **default**:  *2000*,
+    - `'mg_ts_path_load'`**(str)**: Full path to a pre-computed MG time series, which can be used to produce the anomalous time series. The file must contain a numpy array ('.npy'-file). Usually, a lot of time can be saved, if a pre-computed MG time series is available, since the DDE solver does not have to be called in this case. However, this time series has to be long enough, to be split into `'num_series'` new series of length `'series_length'`. The length should be roughly 1.5 x `'num_series'` x `'series_length'`, since also segments of the time series are removed in order to create the anomalies. If this pre-computed time series is too short, an exception will be thrown. In this case, one could reduce `'num_series'` or `'series_length'` or set this parameter to *None*. If this option is set to *None*, no pre-computed MG time series will be loaded from disk. Instead, the DDE solver will generate a time series which is suffiently long. 
+       - **default**:  *None* 
+    - `'mg_tau'`**(float)** :  Parameter *τ* in the MG equation.
+       - **default**:  *18.0*
+    - `'mg_n'`**(float)**:  Parameter *n* in the MG equation.
+       - **default**:  *10.0*
+    - `'mg_beta'`**(float)** : Parameter *β* in the MG equation.  
+       - **default**:  *0.25*
+    - `'mg_gamma'`**(float)** : Parameter *γ* in the MG equation.
+       - **default**:  *0.1*
+    - `'mg_history'`**(float)** : Value for the constant history *h*, which is required by the DDE solver as initial condition.
+       - **default**:  *0.9*
+    - `'mg_T'`**(float)**: Step-size parameter T for the DDE solver. Usually, 'mg_T=1' is sufficient. Smaller step-sizes will reduce the "gaps" between the evaluated points of the MG equation and increase the number of data points which are generated.
+       - **default**:  *1.0*
+    - `'mg_ts_dir_save'`**(str)**: In order to possibly save time in the future, this option can be used to specify a file (only the directory) where the pre-computed MG time series shall be saved. The filename will contain all necessary parameters, which allow the user to later find a certain setting. Since the filename is unique (according to the setting), no check is performed to ensure that no duplicate file is present in the folder. If a file with the same filename should already be present, then this file should contain exactly the same data as the generated one.    
+       - **default**:  *None*,
+    - `'seed'`**(int)**: In order to allow to reproduce certain settings, the user may specify a seed. If no seed is provided (*None*) then the algorithm will take the value i for the i-th time series as seed (0,1,...). So, if a completly random result is necessary, the user should set a sufficiently random seed (e.g., a timestamp in ms, etc.)
+       - **default**:  
+    - `'min_length_cut'`**(int)**: This option specifies the minimum size of the segments which are removed from the time series in order to create an anomaly. It does not make sense to make trivial cuts (e.g. cut segment of length 1, which might happen if adjacent points have the largest similarity in a certain range). Usually, the default value is a good choice.
+       - **default**:  *100*,
+    - `'max_sgmt'`**(int)**:  Maximum segment length in which we want to find the most similar values. In order to create an anomaly we compare the values (and the derivatives) of the time series in two windows with each other. Then, the segment between the 2 most similar values is removed and the 2 remaining ends are "stiched" together again: `# xxxxxxxxxxx [window1] xxxxx [window2] xxxxxxxxxxx`. 'max_sgmt' basically describes the size of window1 and window2 (which both have the same size).  
+       - **default**:  *100* 
+    - `'anomaly_window'`**(int)**: Window size of anomaly window which is put around each anomaly. Smaller windows increase the difficulty, since algorithms have to locate the anomalies more accurately.
+       - **default**:  *400*
+    - `'order_derivative'`**(int)**: Until which (numerical) derivative do we want to compare the similarity of the points? (0->only value, 1-> value and 1st derivative, ...)
+       - **default**:  *3*
+    - `'reproduce_original_mgab'`: This option is used to generate the original MGAB, which is described in the beginning of this page and for which the data has been added to this repository. If this option is set to a value which is not *None*, then most of the previous options will be ignored and the default settings will be taken, so that the original results can be re-produced. Currently, it is only possible to adjust the other options `'output_dir'`, `'output_force_override'` and `'output_format'` (which currently also only has one possibility).  There are 3 options:
+       - 'generate_new_mg': With this option, the whole benchmark is re-computed from scratch. This can take a long time, since the DDE solver has to be run again.
+       - 'use_precomputed_mg': Using this option, the pre-computed MG time series in `./data/mgts_len=5000000tau=18n=10.0bet=0.25gam=0.1h=0.9T=1.npy` will be used to generate the benchmark. The compuation time should be limited in this case. 
+       - None: This value is usually chosen, since in most cases we do not want to re-produce the old time series, but rather create our own new benchmark.
+       - **default**:  *None*
 - **Returns**
+    - A list of Pandas DataFrames containing the anomalous time series including the anomaly labels. Each DataFrame has an index column, the column "value", "is_anomaly" and "is_ignored". These columns are described above.
 
 ## Examples
 
