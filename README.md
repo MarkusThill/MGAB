@@ -79,7 +79,7 @@ The main function of this module is `generate_benchmark(args)`. All parameters a
 Usage:
 ```python3
 import mgab
-mgab = generate_benchmark(args)
+benchmark_list = mgab.generate_benchmark(args)
 ```
 ####  `generate_benchmark(args:dict={'reproduce_original_mgab':'use_precomputed_mg'})` 
 Generates a MGAB according to the specifications of the user. A list of MG time series with a certain number of anomalies is created. The created time series can be directly written to CSV-files and/or returned by this function and processed further.  
