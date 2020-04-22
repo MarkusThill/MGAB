@@ -89,29 +89,59 @@ Generates a MGAB according to the specifications of the user. A list of MG time 
        - 1: Print standard Info-messages
        - larger 1: Debug Messages 
        - **default**: *`1`*
-    - `'output_dir'` **(str)**:  **default**: *`'./mgab/'`*,
-    - `'output_force_override'` **(bool)**:  **default**:`False`,  With this parameter you can force the generator to override benchmark files in the output directory, if a file with that name already exists
-    - `'output_format'`**(str)**:  **default**:`'csv'`, # 'csv' (currently, only csv supported)
-    - `'num_series'`**(int)**:  **default**:`10`,
-    - `'series_length'`**(int)**:  **default**:`100000`,
-    - `'num_anomalies'`**(int)** :  **default**:`10`,
-    - `'noise'`**(str)** :  **default**:`'rnd_uniform'`, # 'rnd_normal', 'rnd_walk', None
-    - `'noise_param'`**(tuple,float)** :  **default**:`(-0.01, 0.01)`, # range for 
-    - `'min_anomaly_distance'`**(int)** :  **default**:`2000`,
-    - `'mg_ts_path_load'`**(str)**:  **default**:`None`, # Default path to a long pre-computed MG time series, which can be used to generate the time series. Should be a numpy array.
-    - `'mg_tau'`**(float)** :  **default**:`18.0`,
-    - `'mg_n'`**(float)**:  **default**:`10.0`,
-    - `'mg_beta'`**(float)** :  **default**:`0.25`,
-    - `'mg_gamma'`**(float)** :  **default**:`0.1`,
-    - `'mg_history'`**(float)** :  **default**:`0.9`,
-    - `'mg_T'`**(float)**:  **default**:`1.0`,
-    - `'mg_ts_dir_save'`**(str)**:  **default**:`None`,
-    - `'seed'`**(int)**:  **default**:`None`, # None: Take the value i for the i-th time series as seed (0,1,...)
-    - `'min_length_cut'`**(int)**:  **default**:`100`, # It does not make sense to make a trivial cut (e.g. cut segment of length 1)
-    - `'max_sgmt'`**(int)**:  **default**:`100`, # maximum segment length in which we want to find the closest value
-    - `'anomaly_window'`**(int)**:  **default**:`400` Window size of anomaly window which is put around each anomaly. Smaller windows increase the difficulty, since algorithms have to locate the anomalies for accurately.
-    - `'order_derivative'`**(int)**:  **default**:`3`, # until which derivative do we want to compare the similarity of the points (0->only value, 1-> value and 1st derivative, ...)
-    - `'reproduce_original_mgab'`:  **default**:`None` # None, 'generate_new_mg', 'use_precomputed_mg'
+    - `'output_dir'` **(str)**:  
+       - **default**: *`'./mgab/'`*,
+    - `'output_force_override'` **(bool)**:  
+       - **default**:*`False`*,  With this parameter you can force the generator to override benchmark files in the output directory, if a file with that name already exists
+    - `'output_format'`**(str)**: Currently, only 'csv' is supported)
+       - **default**:*`'csv'`*
+    - `'num_series'`**(int)**:  
+       - **default**:*`10`*,
+    - `'series_length'`**(int)**:  
+       - **default**:*`100000`*,
+    - `'num_anomalies'`**(int)** :  
+       - **default**:*`10`*,
+    - `'noise'`**(str)** :  
+       - 'rnd_uniform':
+       - 'rnd_walk':
+       - 'rnd_normal': 
+       - None: 
+       - **default**:*`'rnd_uniform'`*
+    - `'noise_param'`**(tuple,float)** :
+       - **default**:*`(-0.01, 0.01)`*
+    - `'min_anomaly_distance'`**(int)** :  
+       - **default**:*`2000`*,
+    - `'mg_ts_path_load'`**(str)**: Default path to a long pre-computed MG time series, which can be used to generate the time series. Should be a numpy array.
+       - **default**:`None`
+    - `'mg_tau'`**(float)** :  
+       - **default**:*`18.0`*,
+    - `'mg_n'`**(float)**:  
+       - **default**:*`10.0`*,
+    - `'mg_beta'`**(float)** :  
+       - **default**:*`0.25`*,
+    - `'mg_gamma'`**(float)** :  
+       - **default**:*`0.1`*,
+    - `'mg_history'`**(float)** :  
+       - **default**:*`0.9`*,
+    - `'mg_T'`**(float)**:  
+       - **default**:*`1.0`*,
+    - `'mg_ts_dir_save'`**(str)**:  
+       - **default**:*`None`*,
+    - `'seed'`**(int)**:  
+       - **default**:*`None`*, # None: Take the value i for the i-th time series as seed (0,1,...)
+    - `'min_length_cut'`**(int)**:  
+       - **default**:*`100`*, # It does not make sense to make a trivial cut (e.g. cut segment of length 1)
+    - `'max_sgmt'`**(int)**:  
+       - **default**:*`100`*, # maximum segment length in which we want to find the closest value
+    - `'anomaly_window'`**(int)**:  
+       - **default**:*`400`* Window size of anomaly window which is put around each anomaly. Smaller windows increase the difficulty, since algorithms have to locate the anomalies for accurately.
+    - `'order_derivative'`**(int)**: Until which (numerical) derivative do we want to compare the similarity of the points (0->only value, 1-> value and 1st derivative, ...)
+       - **default**:*`3`*
+    - `'reproduce_original_mgab'`:  
+       - 'generate_new_mg'
+       - 'use_precomputed_mg'
+       - None
+       - **default**:*`None`*
 - **Returns**
 
 ## Examples
