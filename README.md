@@ -156,9 +156,7 @@ original_mgab = mgab.generate_benchmark()
 ```
 
 ```python3
-# Generate the original MGAB. This will create a directory "mgab" (if not existant yet),
-# and write the 10 CSV-files containing the 10 time series into this folder. These CSV-
-# files should be exactly the same as the original ones in this repository.
+# Generate some customized new benchmark. We can change a few of the default parameters.
 import mgab
 my_new_benchmark = mgab.generate_benchmark({ # we choose a few parameters ourselves
         'output_dir' : 'my_new_benchmark', # specify new directory for the output files
