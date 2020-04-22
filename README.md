@@ -12,6 +12,8 @@ An excerpt of a time series caontaining 3 anomalies is shown in the graph above.
 * [Wolfgang Konen](https://github.com/WolfgangKonen/): wolfgang.konen@th-koeln.de
 
 ### Citing this Repository
+This repository can be cited using the following identifier:
+[![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.3760086.svg)](https://doi.org/10.5281/zenodo.3760086)
 
 ## Download
 The easiest way to download this repository is to clone it with Git:
