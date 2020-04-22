@@ -1,34 +1,199 @@
-# ............................................................................
-# TODO. Documentation
-# Currently refer to https://github.com/MarkusThill/MGAB/blob/master/README.md
-# .............................................................................
-"""MGAB Time Series Generator
+"""MGAB Custom Time Series Generator
 
 This script allows the user to to create his/her own Mackey Glass 
-Anomaly Benchmark
+Anomaly Benchmark. The main function of this module is 
+generate_benchmark(args). All parameters are passed to this function 
+through a Python dictionary. It is possible to pass an empty dictionary 
+or no argument at all. Typically, one would specify a subset of the 
+required parameters in the dictionary; the function would then use 
+the default values for the remaining parameters.
+
+Usage:
+    import mgab
+    mgab = generate_benchmark(args)
 
 This file can also be imported as a module and contains the following
 functions:
 
-    * print_error - 
-    * get_default_params
-    * generate_benchmark
-    * create_anomalous_time_series
-    * lyapunov_MLE
-    * generate_mackey_glass
+    * print_error - Writes error messages to stderr
+    * get_default_params - Generates a dictionary with a set of 
+      default parameters
+    * generate_benchmark - Generates a MGAB according to the specifications 
+      of the user. A list of MG time series with a certain number of 
+      anomalies is created. The created time series can be directly written 
+      to CSV-files and/or returned by this function and processed further.
+    * create_anomalous_time_series - Randomly selects different locations in
+      a given time series where anomalies will be inserted
+    * set_anomalies - Based on a given list of locations, this function will
+      insert anomalies by removing segments of the time series.
+    * lyapunov_MLE - Estimates the Maximum Lyapunov Exponent (MLE) of a given 
+      time series. A positive MLE is usually considered as an indictation for
+      chaotic behaviour in the time series
+    * generate_mackey_glass - Generates a Mackey-Glass (MG) time series according
+      to the requirements which are passed to the function in a dictionary. 
+      This function will run a DDE solver (jitcdde) to obtain the MG time series.
+      
+The main data structure which is passed to many of the functions is a dictionary,
+where all possible options can be specified:
+args: Dictionary, containing all user-specified parameters for generating a MGAB 
+benchmark. It is not necessary to pass any argument to generate_benchmark(). In 
+this case, the original MGAB data is created which was also uploaded to this 
+repository. The function will use the pre-computed MG time series from the file 
+./data/mgts_len=5000000tau=18n=10.0bet=0.25gam=0.1h=0.9T=1.npy to generate the 
+10 original time series. It is also possible to create the whole benchmark from 
+scratch, by adjusting the dictionary entry of 'reproduce_original_mgab', 
+as described below. 
+
+Currently, the following options are supported:
+    - 'verbosity' (int): Integer, describing the level of verbosity. 
+         - 0: No outputs to stdout 
+         - 1: Print standard Info-messages
+         - Larger than 1: Debug Messages 
+         + default:  *1*
+    - 'output_dir' (str): Directory, in which the resulting files containing the individual 
+         time series will be written. The option None allows to turn off the saving. Per default, 
+         the files are named 1.csv, 2.csv, ... and have the same format as the original files 
+         described above. 
+         + default:  './mgab/'
+    - 'output_force_override' (bool): If a file with the same name already exists in the output 
+         directory, then this will *not* be overwritten per default. This can be changed by setting 
+         this option to *True*. So with this option you can force the generator to override benchmark 
+         files in the output directory, if a file with that name already exists.
+         + default:  *False*
+    - 'output_format'(str): Currently, only 'csv' is supported. All output files, saved as 1.csv, 
+         2.csv, ..., are comma-seperated-value (CSV) files.
+         + default:  *'csv'*
+    - 'num_series'(int): The number of individual anomalous time series, which should be generated. 
+         Creating many time series might take a lot of time, since the DDE solver has to pre-compute 
+         (and if no already pre-computed MG time series is available, see 'mg_ts_path_load') one long 
+         MG time series which is then split into the specified number.   
+         + default:  *10*
+    - 'series_length'(int): The length of one anomalous time series. Similarly to 'num_series', it might 
+         be computationally expensive, if too large values are chosen.
+         + default:  *100000*
+    - 'num_anomalies'(int) : The number of anomalies which are placed into each time series. E.g., if 10 
+         time series are generated and this option is set to 10, then the overall benchmark will contain 
+         100 anomalies.
+         + default:  *10*,
+    - 'noise'(str) :   In order to further increase the complexity of the benchmark and to be more similar 
+         to real-world problems, there is a possibility to add random noise to the individual anomalous MG 
+         time series. It is also possible to turn off the noise component. The amount of noise is controlled
+         by 'noise_param'. There are 4 options: 
+         + 'rnd_uniform': Adds random uniform noise to the time series.
+         + 'rnd_walk': Samples from a random uniform distribution and computes a random walk (cumulative sum) 
+            over these values.
+         + 'rnd_normal': Sample from a Gaussian normal distribution.
+         + None: Do not add any noise to the time series
+         + default:  *'rnd_uniform'*
+    - 'noise_param'(tuple,float) : For 'rnd_uniform' and 'rnd_walk', specifies the lower and upper bound for 
+         the random uniform distribution, respectively. For 'rnd_normal', the first element describes the mean 
+         (loc) and the second element the standard deviation (scale).
+         + default:  *(-0.01, 0.01)* for 'rnd_uniform', *(-0.001, 0.001)* for 'rnd_walk' 
+           and *(0, 0.01)* for 'rnd_normal'.
+    - 'min_anomaly_distance'(int) : The minimum distance between 2 anomalies. The difficulty of the benchmark 
+         usually increases, if this distance is reduced.
+         + default:  *2000*,
+    - 'mg_ts_path_load'(str): Full path to a pre-computed MG time series, which can be used to produce the anomalous 
+         time series. The file must contain a numpy array ('.npy'-file). Usually, a lot of time can be saved, if a 
+         pre-computed MG time series is available, since the DDE solver does not have to be called in this case. However, 
+         this time series has to be long enough, to be split into 'num_series' new series of length 'series_length'. 
+         The length should be roughly 1.5 x 'num_series' x 'series_length', since also segments of the time series are 
+         removed in order to create the anomalies. If this pre-computed time series is too short, an exception will be 
+         thrown. In this case, one could reduce 'num_series' or 'series_length' or set this parameter to *None*. If this 
+         option is set to *None*, no pre-computed MG time series will be loaded from disk. Instead, the DDE solver will 
+         generate a time series which is suffiently long. 
+         + default:  *None* 
+    - 'mg_tau'(float) :  Parameter *τ* in the MG equation.
+         + default:  *18.0*
+    - 'mg_n'(float):  Parameter *n* in the MG equation.
+         + default:  *10.0*
+    - 'mg_beta'(float) : Parameter *β* in the MG equation.  
+         + default:  *0.25*
+    - 'mg_gamma'(float) : Parameter *γ* in the MG equation.
+         + default:  *0.1*
+    - 'mg_history'(float) : Value for the constant history *h*, which is required by the DDE solver as initial condition.
+         + default:  *0.9*
+    - 'mg_T'(float): Step-size parameter T for the DDE solver. Usually, 'mg_T=1' is sufficient. Smaller step-sizes will 
+         reduce the "gaps" between the evaluated points of the MG equation and increase the number of data points which 
+         are generated.
+         + default:  *1.0*
+    - 'mg_ts_dir_save'(str): In order to possibly save time in the future, this option can be used to specify a file 
+         (only the directory) where the pre-computed MG time series shall be saved. The filename will contain all necessary 
+         parameters, which allow the user to later find a certain setting. Since the filename is unique (according to the 
+         setting), no check is performed to ensure that no duplicate file is present in the folder. If a file with the same 
+         filename should already be present, then this file should contain exactly the same data as the generated one.    
+         + default:  *None*,
+    - 'seed'(int): In order to allow to reproduce certain settings, the user may specify a seed. If no seed is provided 
+         (*None*) then the algorithm will take the value i for the i-th time series as seed (0,1,...). So, if a completly 
+         random result is necessary, the user should set a sufficiently random seed (e.g., a timestamp in ms, etc.)
+         + default: *None* 
+    - 'min_length_cut'(int): This option specifies the minimum size of the segments which are removed from the time series in 
+         order to create an anomaly. It does not make sense to make trivial cuts (e.g. cut segment of length 1, which might 
+         happen if adjacent points have the largest similarity in a certain range). Usually, the default value is a good choice.
+         + default:  *100*,
+    - 'max_sgmt'(int):  Maximum segment length in which we want to find the most similar values. In order to create an anomaly 
+         we compare the values (and the derivatives) of the time series in two windows with each other. Then, the segment between
+         the 2 most similar values is removed and the 2 remaining ends are "stiched" together again: 
+         # xxxxxxxxxxx [window1] xxxxx [window2] xxxxxxxxxxx. 'max_sgmt' basically describes the size of window1 and window2 
+         (which both have the same size).  
+         + default:  *100* 
+    - 'anomaly_window'(int): Window size of anomaly window which is put around each anomaly. Smaller windows increase the difficulty, 
+         since algorithms have to locate the anomalies more accurately.
+         + default:  *400*
+    - 'order_derivative'(int): Until which (numerical) derivative do we want to compare the similarity of the points? (0->only value, 
+         1-> value and 1st derivative, ...)
+         + default:  *3*
+    - 'reproduce_original_mgab': This option is used to generate the original MGAB, which is described in the beginning of this page 
+         and for which the data has been added to this repository. If this option is set to a value which is not *None*, then most of 
+         the previous options will be ignored and the default settings will be taken, so that the original results can be re-produced. 
+         Currently, it is only possible to adjust the other options 'output_dir', 'output_force_override' and 'output_format' (which 
+         currently also only has one possibility).  There are 3 options:
+         + 'generate_new_mg': With this option, the whole benchmark is re-computed from scratch. This can take a long time, since the 
+            DDE solver has to be run again.
+         + 'use_precomputed_mg': Using this option, the pre-computed MG time series in 
+            ./data/mgts_len=5000000tau=18n=10.0bet=0.25gam=0.1h=0.9T=1.npy will be used to generate the benchmark. The compuation time 
+            should be limited in this case. 
+         + None: This value is usually chosen, since in most cases we do not want to re-produce the old time series, but rather create our own new benchmark.
+         + default:  *None*
 """
 
 
 def print_error(err_msg):
+    """Prints an error message to stderr 
+
+        Parameters
+        ----------
+        err_msg : str
+            The error message, which is written to stderr.
+
+        Raises
+        ------
+    """
     import sys
     sys.stdout.flush()  # first get rid of all other messages
     sys.stderr.write(err_msg)
     sys.stderr.write("\n")
-    sys.stderr.flush()
+    sys.stderr.flush() # Make sure, the error is immediately shown
+# --------------------------------------------------------------------------------------------------------------
 
-
-# Do not change the default params. If you need other default parameter, you can write a new function... 
 def get_default_params():
+    """ Returns the default options which can be used to generate a new 
+        MGAB with the standard settings.
+
+        Parameters
+        ----------
+        None
+        
+        Raises
+        ------
+ 
+        Returns
+        -------
+        a dictionary containing all default options which are required to generate
+        the MGAB. Note that these options are used in the generation process, if
+        not explicitely specified by the user. The options of the dictionary are
+        described above.
+    """
     return {
         'verbosity': 1,  # 0: No outputs, 1: Standard Info-messages, >=2: Debug Messages
         'output_dir': 'mgab',
@@ -42,7 +207,7 @@ def get_default_params():
         'noise_param': (-0.01, 0.01),  # range for 
         'min_anomaly_distance': 2000,
         'mg_ts_path_load': None,
-        # Default path to a long pre-computed MG time series, which can be used to generate the time series. Should be a numpy array.
+        # Default path to a long pre-computed MG time series, which can be used to generate the time series.
 
         # Parameters for the generation of the Mackey-Glass Time Series:
         'mg_tau': 18.0,
@@ -63,9 +228,43 @@ def get_default_params():
         # until which derivative do we want to compare the similarity of the points (0->only value, 1-> value and 1st derivative, ...)
         'reproduce_original_mgab': None  # None, 'generate_new_mg', 'use_precomputed_mg'
     }
-
+# --------------------------------------------------------------------------------------------------------------
 
 def generate_benchmark(args: dict = {'reproduce_original_mgab': 'use_precomputed_mg'}):
+    """ Generates a MGAB according to the specifications of the user. A list of MG time series with a 
+    certain number of anomalies is created. The created time series can be directly written to 
+    CSV-files and/or returned by this function and processed further.
+
+        Parameters
+        ----------
+        args : dict, optional
+            A dictionary where different options can be set by the user. Note that it is not required
+            to set any options. In this case the defaults will be used. Also note that it makes a
+            difference if an empty dictionary is passed or if no argument is passed at all to this
+            function. If an empty dictionary is passed, a benchmark similar to the original MGAB 
+            will be created, however the generated time series will not be exactly the same. In order
+            to exactly reproduce the time series of the original MGAB just call the function without
+            any argument, e.g.:
+                original_mgab = mgab.generate_benchmark()
+        
+        Raises
+        ------
+            None
+            However, several exceptions might be thrown (and caught) within this function which will 
+            lead to error messages. We try to handle most errors to ensure that no results are lost
+            after a possibly lenghty generation process. Ideally, even if some files cannot be saved,
+            the function should return a list with the generated time series when the generation 
+            procedure is completed.
+            Furthermore, the function aborts if inconsistent options are found. Since these checks
+            are done in the beginning, no computation time should be lost.
+ 
+        Returns
+        -------
+        A list of pandas DataFrames. Each DataFrame contains one anomalous time series and also the 
+        anomaly labels. In total there are 4 columns: index, value, is_anomaly, is_ignored. The last
+        column can be used to allow a warm-up phase for algorithms and not to count wrong detections
+        in the inital 256 time steps.
+    """
     import sys, os
     import numpy as np
     import time
@@ -146,7 +345,7 @@ def generate_benchmark(args: dict = {'reproduce_original_mgab': 'use_precomputed
             par['min_length_cut'] + 2 * par['max_sgmt'])  # par['min_anomaly_distance'] + 
     mg_required_length = (mg_required_length * 6) // 5  # just to make sure
     if par['reproduce_original_mgab'] is not None:
-        mg_required_length = 15 * 10 ** 4 * par["num_series"]  # This was used for the original benchmark
+        mg_required_length = 15 * 10**4 * par["num_series"]  # This was used for the original benchmark
         if verbose > 0:
             print(
                 "Rebuilding original benchmark. For that I need a MG time series of overall length:",
@@ -265,9 +464,40 @@ def generate_benchmark(args: dict = {'reproduce_original_mgab': 'use_precomputed
     # return a list of the individual time series (as pandas DataFrames)
     np.random.seed(None)  # reset the seed
     return all_ts
-
+# --------------------------------------------------------------------------------------------------------------
 
 def create_anomalous_time_series(series, args: dict):
+    """ Generates a MGAB according to the specifications of the user. A list of MG time series with a 
+    certain number of anomalies is created. The created time series can be directly written to 
+    CSV-files and/or returned by this function and processed further.
+
+        Parameters
+        ----------
+        series : np.array
+            A one-dimensional array, containing a (normal) time series in which anomalies will be 
+            inserted. This array has to be longer than the final length which is specified in the
+            args dictionary. This is due to the fact that the anomaly insertion process removes
+            several segments of the time series.
+        args : dict
+            A dictionary containing all required options. Refer to the module description above to 
+            see a detailed discussion of all options. Not all options will be required in this function
+            but it also does not harm to pass non-used options.
+        
+        Raises
+        ------
+        Exception
+            If the selection of the anomaly locations fails (since it loops until a valid selection
+            is found), then a general Exception is thrown. This Exception might be thrown if too many
+            anomalies have to be inserted in a too short time series. In this case there might be no
+            way to insert all anomalies and also ensuring a minimum distance between the anomalies.
+            
+ 
+        Returns
+        -------
+        A time series with the specified number of anomalies as pandas DataFrame. If requested, 
+        also a certain amount of noise is added to the resulting time series.
+        
+    """
     import numpy as np
     verbose = args["verbosity"]
     length = args["series_length"]
@@ -317,7 +547,7 @@ def create_anomalous_time_series(series, args: dict):
 def lyapunov_MLE(args: dict, length=10000):
     """Calculates the Maximum Lyapunov Exponent (MLE) for a given setting 
 
-        If the argument `length` isn't passed in, the default length of
+        If the argument length isn't passed in, the default length of
         10k is used.
 
         Parameters
@@ -326,12 +556,22 @@ def lyapunov_MLE(args: dict, length=10000):
             The length of the MG time series which is generated to estimate the MLE
         args : dict
             A dictionary with all necessary parameters describing the MG equation
+            The following options have to be specified in the dictionary:
+               * "mg_tau"
+               * "mg_n"
+               * "mg_beta"
+               * "mg_gamma"
+               * "mg_history"
+               * "step_size"
 
         Raises
         ------
-        NotImplementedError
-            Not yet.
-        """
+        
+        Returns
+        -------
+        The estimated Maximum Lyapunov Exponent (MLE). Positive values are usually
+        taken as an indication that 
+    """
 
     from jitcdde import jitcdde_lyap, y, t
     import numpy
@@ -344,7 +584,7 @@ def lyapunov_MLE(args: dict, length=10000):
     history = args["mg_history"]
     step_size = args["step_size"]
 
-    f = [β * y(0, t - τ) / (1 + y(0, t - τ) ** n) - γ * y(0)]
+    f = [β * y(0, t - τ) / (1 + y(0, t - τ) **  n) - γ * y(0)]
     n_lyap = 1
     DDE = jitcdde_lyap(f, n_lyap=n_lyap)
 
@@ -370,11 +610,39 @@ def lyapunov_MLE(args: dict, length=10000):
         Lyaps.append(Lyap)
         stderrs.append(stderr)
     return (Lyaps[0], stderrs[0])  # return the MLE (Maximum Lyapunov Exponent)
-
-
 # --------------------------------------------------------------------------------------------------------------
 
+
 def generate_mackey_glass(args: dict):
+    """ Generates a new Mackey-Glass time series using an accurate DDE solver (jitcdde).
+        Depending on the length of the series, the solver can require quite some time.
+        We observed that for a series of length 100k about 3 minutes are needed. However,
+        this value is only a rough hint, since other parameter settings might require more
+        time and also different target platforms / operating systems have large impact on
+        the computation time.
+    
+        Parameters
+        ----------
+        args : dict
+           The following options have to be specified in the dictionary:
+               * "series_length"
+               * "mg_tau"
+               * "mg_n"
+               * "mg_beta"
+               * "mg_gamma"
+               * "mg_history"
+               * "step_size"
+            
+        
+        Raises
+        ------
+       
+        Returns
+        -------
+        The generated Mackey-Glass time series as a numpy array of shape (series length,)
+        
+        
+    """
     from jitcdde import jitcdde, y, t
     import numpy as np
     τ = args["mg_tau"]
@@ -385,7 +653,7 @@ def generate_mackey_glass(args: dict):
     stepsize = args["mg_T"]  # fixed for the moment (check, if smaller values are required)
     length = args["series_length"]
 
-    f = [β * y(0, t - τ) / (1 + y(0, t - τ) ** n) - γ * y(0)]
+    f = [β * y(0, t - τ) / (1 + y(0, t - τ) **  n) - γ * y(0)]
     DDE = jitcdde(f)
     DDE.set_integration_parameters(atol=1.0e-16, rtol=1.0e-10)  # min_step = 1.0e-15
 
@@ -398,11 +666,49 @@ def generate_mackey_glass(args: dict):
         data.append(DDE.integrate(time))
 
     return np.array(data).squeeze()
-
-
 # --------------------------------------------------------------------------------------------------------------
 
+
 def set_anomalies(series, anomalies_idx: list, args: dict):
+    """ Inserts anomalies into a time series by removing segments at certain positions. 
+        If the split points, where the segments will be removed, are chosen carefully,
+        the manipulation will be later hardly visible to the human eye. We use an approach,
+        where we compare the values and derivatives in two windows with each other. Those
+        two points (one from each window) which have the largest similarity will be selected
+        as split points and the segment in between will be removed. Then the two remaining
+        ends of the time series are "stiched" together again.
+    
+        Parameters
+        ----------
+        series: np.array
+           A numpy array containing the normal (nominal) time series in which the anomalies 
+           are to be inserted
+        anomalies_idx: list
+           A list of locations, where the anomalies will be inserted. Note that these locations
+           are only rough positions, since we will look in the neighborhood of the anomaly location 
+           for suitable points which are very similar. So the actual anomaly might be more on the
+           left or the right of the given location.
+        args : dict 
+           A dictionary containing the necessary options for the insertion process. It does not harm
+           to pass unrelated options as well, since they will be ignored. But the following options
+           must be present:
+           * 'min_length_cut'
+           * 'max_sgmt'
+           * 'anomaly_window'
+           * 'order_derivative'
+           * 'verbosity'
+           A detailed description of all options can be found in the module description at the beginning
+           of this file.
+        Raises
+        ------
+       
+        Returns
+        -------
+        Returns a time series, where the anomalies have been inserted according to the
+        specified locations.
+        
+        
+    """
     import numpy as np
     import pandas as pd
     min_length_cut = args[
@@ -448,7 +754,7 @@ def set_anomalies(series, anomalies_idx: list, args: dict):
         mod_window2 = all_grads[:, ad_idx + max_sgmt + min_length_cut: ad_idx + min_length_cut + 2 * max_sgmt]
 
         similarities = np.sqrt(
-            (np.apply_along_axis(lambda x: mod_window1 - x[:, np.newaxis], axis=0, arr=mod_window2) ** 2).sum(axis=0))
+            (np.apply_along_axis(lambda x: mod_window1 - x[:, np.newaxis], axis=0, arr=mod_window2) **  2).sum(axis=0))
 
         best_points = np.argwhere(similarities == np.min(similarities))[0]  # (index first window, index 2nd window)
         if verbose > 3:
