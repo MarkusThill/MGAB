@@ -58,11 +58,11 @@ For the 10 time series of this benchmark, in total 100 anomalies were inserted (
 ![Anomalous Mackey-Glass Time Series with revealed Anomalies][footer]
 **Figure 3**: This graph shows the same section of a Mackey-Glass time series as the first graph on this page, but now reveals the location of the anomalies in the time series. The anomalies are at t<sub>1</sub> = 40388, t<sub>2</sub>=40917 and t<sub>3</sub>=41550. The positions are indicated by the black crosses in the plot.
 
+===
+***
 # Generating your own MGAB Benchmark
 
 Based on the procedure described in the previous section, it is also possible to adjust different parameters and generate an own MGAB with steerable size and difficulty.
-
-## Necessary Files
 
 ## Dependencies
 The following dependencies are required for running the code on all operating systems. In the parentheses we add the version, which we used for our experiments. 
