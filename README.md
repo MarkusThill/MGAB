@@ -168,6 +168,7 @@ my_new_benchmark = mgab.generate_benchmark({ # we choose a few parameters oursel
         'noise' : 'rnd_uniform',# Add random uniform noise
         'noise_param' : (-0.01, 0.01), # range for random uniform noise
         'min_anomaly_distance' : 200, # Anomalies have to have a distance of at least 200
+        'mg_tau' : 30, # use a larger value for tau
         'mg_ts_path_load' : None, # We do not have any pre-computed MG time series. So generate it with the DDE solver
         'mg_ts_dir_save' : "./data/" # Save the generated MG time series of the DDE solver in the data directory. This 
                                      # allows us, to reuse it again (e.g., if we want to change the number of anomalies)
