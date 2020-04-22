@@ -5,7 +5,7 @@
 
 This repository contains the Mackey-Glass anomaly benchmark (MGAB), which is composed of synthetic Mackey-Glass time series with non-trivial anomalies. Mackey-Glass time series are known to exhibit chaotic behavior under certain conditions. MGAB contains 10 MG time series of length 10<sup>5</sup>. Into each time series 10 anomalies are inserted with a procedure as described below.
 In contrast to other synthetic benchmarks,  it is very hard for the human eye to distinguish the introduced anomalies from the normal (chaotic) behavior. 
-An excerpt of a time series caontaining 3 anomalies is shown in the graph above. The location of the anomalies are revealed in the last plot of this page.
+An excerpt of a time series containing 3 anomalies is shown in the graph above. The location of the anomalies are revealed in the last plot of this page.
 
 ### Authors/Contributors
 * [Markus Thill](https://github.com/MarkusThill): markus.thill@th-koeln.de
