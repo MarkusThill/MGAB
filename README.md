@@ -15,6 +15,11 @@ An excerpt of a time series containing 3 anomalies is shown in the graph above. 
 This repository can be cited using the following identifier:
 [![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.3760086.svg)](https://doi.org/10.5281/zenodo.3760086)
 
+The benchmark is also used in the following paper:
+Thill, M., Konen, W., & Bäck, T. (2020, November). Time series encodings with temporal convolutional networks. In International Conference on Bioinspired Methods and Their Applications (pp. 161-173). Springer, Cham.
+
+If you use the MGAB for your work as well, just let us know and we can add a reference to your publication here.
+
 ## Download
 The easiest way to download this repository is to clone it with Git:
 `git clone https://github.com/MarkusThill/MGAB.git`
